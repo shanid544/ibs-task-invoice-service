@@ -1,9 +1,8 @@
 package com.ibs_demo.invoice_service.exception;
 
-import com.ibs_demo.invoice_service.exception.customExceptions.DuplicateEmailException;
+import com.ibs_demo.invoice_service.exception.appexceptions.DuplicateEmailException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

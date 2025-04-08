@@ -6,10 +6,13 @@ import com.ibs_demo.invoice_service.entity.Invoice;
 import com.ibs_demo.invoice_service.entity.PaymentInformation;
 import com.ibs_demo.invoice_service.entity.User;
 import com.ibs_demo.invoice_service.event.InvoiceCreatedEvent;
+import com.ibs_demo.invoice_service.exception.appexceptions.CountryCodeNotConfiguredException;
+import com.ibs_demo.invoice_service.exception.appexceptions.InvalidCountryCodeException;
+import com.ibs_demo.invoice_service.exception.appexceptions.InvoiceAccessDeniedException;
+import com.ibs_demo.invoice_service.exception.appexceptions.MissingItemQuantityException;
 import com.ibs_demo.invoice_service.model.CountryCode;
 import com.ibs_demo.invoice_service.model.InvoiceStatus;
 import com.ibs_demo.invoice_service.model.Role;
-import com.ibs_demo.invoice_service.repository.BillingLineRepository;
 import com.ibs_demo.invoice_service.repository.InvoiceRepository;
 import com.ibs_demo.invoice_service.repository.UserRepository;
 import com.ibs_demo.invoice_service.request.BillingLineRequest;
@@ -18,9 +21,10 @@ import com.ibs_demo.invoice_service.response.InvoiceResponse;
 import com.ibs_demo.invoice_service.response.ItemDetails;
 import com.ibs_demo.invoice_service.response.ItemList;
 import com.ibs_demo.invoice_service.service.InvoiceService;
-import com.ibs_demo.invoice_service.service.ItemServiceClient;
+import com.ibs_demo.invoice_service.service.ItemServiceRestClient;
 import com.ibs_demo.invoice_service.service.TaxService;
 import com.ibs_demo.invoice_service.utils.InvoiceMapper;
+import com.ibs_demo.invoice_service.utils.SecurityUtils;
 import com.ibs_demo.invoice_service.utils.TaxServiceProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,21 +46,21 @@ import java.util.stream.Collectors;
 public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
-    private final BillingLineRepository billingLineRepository;
     private final UserRepository userRepository;
-    private final ItemServiceClient itemServiceClient;
+    private final ItemServiceRestClient itemServiceClient;
     private final InvoiceServiceConfig invoiceServiceConfig;
     private final TaxServiceProvider taxServiceProvider;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @PreAuthorize("hasRole('SUPPLIER')")
     public InvoiceResponse generateInvoice(InvoiceRequest invoiceRequest) {
-        log.info("Generating invoice for supplier: {}", invoiceRequest.getSupplierEmail());
-        Invoice invoice = buildInvoice(invoiceRequest);
+        String currentSupplierEmail = SecurityUtils.getCurrentUserEmail();
+        log.info("Generating invoice for supplier: {}", currentSupplierEmail);
+        Invoice invoice = buildInvoice(invoiceRequest, currentSupplierEmail);
 
         for (BillingLine billingLine : invoice.getBillingLines()) {
             billingLine.setInvoice(invoice);
         }
+
         Invoice savedInvoice = invoiceRepository.save(invoice);
 
         applicationEventPublisher.publishEvent(new InvoiceCreatedEvent(savedInvoice));
@@ -65,20 +69,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         return InvoiceMapper.toInvoiceResponse(savedInvoice);
     }
 
-    private Invoice buildInvoice(InvoiceRequest invoiceRequest) {
-        User supplier = userRepository.findByEmail(invoiceRequest.getSupplierEmail())
+    private Invoice buildInvoice(InvoiceRequest invoiceRequest , String supplierEmail) {
+        User supplier = userRepository.findByEmail(supplierEmail)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
-
-        if (supplier.getRole() != Role.SUPPLIER) {
-            throw new RuntimeException("User is not a supplier");
-        }
 
         Invoice invoice = new Invoice();
         invoice.setStatus(InvoiceStatus.ACTIVE);
         invoice.setBillingId(invoiceRequest.getBillingId());
         invoice.setSupplier(supplier);
         invoice.setBuyer(userRepository.findById(invoiceRequest.getBuyerId()).orElseThrow(
-                () -> new RuntimeException("Supplier not found")
+                () -> new RuntimeException("Buyer not found")
         ));
         List<Long> itemIds = invoiceRequest.getBillingLines()
                 .stream()
@@ -92,13 +92,13 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         CountryCode countryCode = getCountryCode(supplier);
         List<BillingLine> billingLines = getBillingLines(itemList, itemIdToQuantityMap, invoice);
+        invoice.setBillingLines(billingLines);
 
         TaxService taxService = taxServiceProvider.getService(countryCode);
         double baseAmount = invoice.getBillingLines().stream().mapToDouble(BillingLine::getTotalAmount).sum();
         double tax = taxService.calculateTax(baseAmount);
         double finalTotal = baseAmount + tax;
 
-        invoice.setBillingLines(billingLines);
         invoice.setCountryCode(countryCode);
         invoice.setInvoiceDate(LocalDate.now());
         invoice.setPaymentDueDate(LocalDate.now().plusDays(invoiceServiceConfig.getPaymentDueDays()));
@@ -129,7 +129,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             Integer quantity = itemIdToQuantityMap.getOrDefault(item.getId(), null);
 
             if (quantity == null) {
-                throw new RuntimeException("Quantity not found for item ID: " + item.getId());
+                throw new MissingItemQuantityException(item.getId());
             }
 
             BillingLine billingLine = new BillingLine();
@@ -150,13 +150,13 @@ public class InvoiceServiceImpl implements InvoiceService {
             String configCountryCode = invoiceServiceConfig.getCountryCode();
 
             if (configCountryCode == null || configCountryCode.isBlank()) {
-                throw new RuntimeException("Country code not configured. Please set 'invoice-service.country-code' in application properties.");
+                throw new CountryCodeNotConfiguredException();
             }
 
             try {
                 countryCode = CountryCode.valueOf(configCountryCode);
             } catch (IllegalArgumentException ex) {
-                throw new RuntimeException("Invalid country code configured: " + configCountryCode, ex);
+                throw new InvalidCountryCodeException(configCountryCode, ex);
             }
         }
         return countryCode;
@@ -173,7 +173,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         if (!invoice.getBuyer().getEmail().equals(email) &&
                 !invoice.getSupplier().getEmail().equals(email)) {
-            throw new RuntimeException("Access Denied");
+            throw new InvoiceAccessDeniedException("Access Denied");
         }
 
         return InvoiceMapper.toInvoiceResponse(invoice);
@@ -195,7 +195,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<InvoiceResponse> invoiceResponses = invoices.getContent()
                 .stream()
                 .map(InvoiceMapper::toInvoiceResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageImpl<>(invoiceResponses, pageable, invoices.getTotalElements());
     }

@@ -2,7 +2,7 @@ package com.ibs_demo.invoice_service.service;
 
 import com.ibs_demo.invoice_service.config.JwtService;
 import com.ibs_demo.invoice_service.entity.User;
-import com.ibs_demo.invoice_service.exception.customExceptions.DuplicateEmailException;
+import com.ibs_demo.invoice_service.exception.appexceptions.DuplicateEmailException;
 import com.ibs_demo.invoice_service.model.CountryCode;
 import com.ibs_demo.invoice_service.model.Role;
 import com.ibs_demo.invoice_service.repository.UserRepository;
@@ -23,7 +23,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Optional;
 

@@ -18,7 +18,8 @@ public class InvoiceController {
 
     private final InvoiceService invoiceService;
 
-    @PostMapping("/generate/{supplierEmail}")
+    @PreAuthorize("hasRole('SUPPLIER')")
+    @PostMapping("/generate")
     public ResponseEntity<InvoiceResponse> generateInvoice(@RequestBody @Valid InvoiceRequest invoiceRequest) {
         return ResponseEntity.ok(invoiceService.generateInvoice(invoiceRequest));
     }

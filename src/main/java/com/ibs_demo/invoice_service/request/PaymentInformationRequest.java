@@ -8,10 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class PaymentInformationRequest {
-    @NotNull
+public class PaymentInformationRequest {
+    @NotNull(message = "Payment method is required")
     private String paymentMethod;
-    @NotNull
+
+    @NotNull(message = "Card type is required when payment method is CARD")
     private String cardType;
     private String paymentInstrumentId;
     private String formOfPaymentId;
