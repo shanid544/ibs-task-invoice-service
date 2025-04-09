@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.service;
 
 
 import com.ibs_demo.invoice_service.config.InvoiceServiceConfig;
@@ -15,6 +15,8 @@ import com.ibs_demo.invoice_service.request.PaymentInformationRequest;
 import com.ibs_demo.invoice_service.response.InvoiceResponse;
 import com.ibs_demo.invoice_service.response.ItemDetails;
 import com.ibs_demo.invoice_service.response.ItemList;
+import com.ibs_demo.invoice_service.service.ItemServiceRestClient;
+import com.ibs_demo.invoice_service.service.TaxService;
 import com.ibs_demo.invoice_service.service.impl.InvoiceServiceImpl;
 import com.ibs_demo.invoice_service.utils.TaxServiceProvider;
 import org.junit.jupiter.api.AfterEach;

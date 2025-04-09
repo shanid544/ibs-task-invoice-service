@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.entity;
 
 import com.ibs_demo.invoice_service.entity.BillingLine;
 import com.ibs_demo.invoice_service.entity.Invoice;

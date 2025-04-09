@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.cachedata;
+package com.ibs_demo.invoice_service.inmemory;
 
 import com.ibs_demo.invoice_service.response.ItemDetails;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,7 @@
 package com.ibs_demo.invoice_service.config;
 
 import com.ibs_demo.invoice_service.exception.appexceptions.InvalidJwtTokenException;
+import com.ibs_demo.invoice_service.service.impl.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

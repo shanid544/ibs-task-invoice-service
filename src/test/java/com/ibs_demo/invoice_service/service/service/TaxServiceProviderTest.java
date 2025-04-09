@@ -1,6 +1,7 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.service;
 
 import com.ibs_demo.invoice_service.model.CountryCode;
+import com.ibs_demo.invoice_service.service.TaxService;
 import com.ibs_demo.invoice_service.service.impl.DefaultTaxService;
 import com.ibs_demo.invoice_service.utils.TaxServiceProvider;
 import org.junit.jupiter.api.BeforeEach;

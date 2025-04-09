@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.exception;
 
 import com.ibs_demo.invoice_service.exception.ErrorResponse;
 import com.ibs_demo.invoice_service.exception.GlobalExceptionHandler;

@@ -1,7 +1,7 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.config;
 
 import com.ibs_demo.invoice_service.config.JwtAuthenticationFilter;
-import com.ibs_demo.invoice_service.config.JwtService;
+import com.ibs_demo.invoice_service.service.impl.JwtService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.config;
+package com.ibs_demo.invoice_service.service.impl;
 
 import com.ibs_demo.invoice_service.model.Role;
 import io.jsonwebtoken.Claims;

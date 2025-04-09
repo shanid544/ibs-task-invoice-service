@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.utils;
 
 import com.ibs_demo.invoice_service.exception.appexceptions.UnauthorizedAccessException;
 import com.ibs_demo.invoice_service.utils.SecurityUtils;

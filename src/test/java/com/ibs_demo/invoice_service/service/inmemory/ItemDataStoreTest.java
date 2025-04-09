@@ -1,6 +1,6 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.inmemory;
 
-import com.ibs_demo.invoice_service.cachedata.ItemDataStore;
+import com.ibs_demo.invoice_service.inmemory.ItemDataStore;
 import com.ibs_demo.invoice_service.response.ItemDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

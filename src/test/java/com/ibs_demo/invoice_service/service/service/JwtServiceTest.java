@@ -1,6 +1,6 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.service;
 
-import com.ibs_demo.invoice_service.config.JwtService;
+import com.ibs_demo.invoice_service.service.impl.JwtService;
 import com.ibs_demo.invoice_service.model.Role;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;

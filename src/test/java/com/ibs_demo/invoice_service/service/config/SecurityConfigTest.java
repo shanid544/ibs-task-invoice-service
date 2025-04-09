@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.config;
 
 import com.ibs_demo.invoice_service.config.JwtAuthenticationFilter;
 import com.ibs_demo.invoice_service.config.SecurityConfig;

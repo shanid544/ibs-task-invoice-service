@@ -1,6 +1,6 @@
-package com.ibs_demo.invoice_service.service;
+package com.ibs_demo.invoice_service.service.service;
 
-import com.ibs_demo.invoice_service.config.JwtService;
+import com.ibs_demo.invoice_service.service.impl.JwtService;
 import com.ibs_demo.invoice_service.entity.User;
 import com.ibs_demo.invoice_service.exception.appexceptions.DuplicateEmailException;
 import com.ibs_demo.invoice_service.model.CountryCode;
