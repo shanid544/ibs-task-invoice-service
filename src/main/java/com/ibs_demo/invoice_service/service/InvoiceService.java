@@ -1,12 +1,9 @@
 package com.ibs_demo.invoice_service.service;
 
-import com.ibs_demo.invoice_service.entity.Invoice;
 import com.ibs_demo.invoice_service.model.InvoiceStatus;
 import com.ibs_demo.invoice_service.request.InvoiceRequest;
 import com.ibs_demo.invoice_service.response.InvoiceResponse;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 public interface InvoiceService {
     InvoiceResponse generateInvoice(InvoiceRequest invoiceRequest);

@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.utils;
+package com.ibs_demo.invoice_service.mapper;
 
 import com.ibs_demo.invoice_service.config.InvoiceServiceConfig;
 import com.ibs_demo.invoice_service.entity.User;

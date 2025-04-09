@@ -10,7 +10,7 @@ import com.ibs_demo.invoice_service.request.UserRequest;
 import com.ibs_demo.invoice_service.response.UserLoginResponse;
 import com.ibs_demo.invoice_service.response.UserRegResponse;
 import com.ibs_demo.invoice_service.service.impl.AuthService;
-import com.ibs_demo.invoice_service.utils.UserMapper;
+import com.ibs_demo.invoice_service.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,6 +106,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5778")
     void testLoginUserNotFoundThrowsException() {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));

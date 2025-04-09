@@ -6,7 +6,7 @@ import com.ibs_demo.invoice_service.model.CountryCode;
 import com.ibs_demo.invoice_service.model.Role;
 import com.ibs_demo.invoice_service.request.UserRequest;
 import com.ibs_demo.invoice_service.response.UserResponse;
-import com.ibs_demo.invoice_service.utils.UserMapper;
+import com.ibs_demo.invoice_service.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

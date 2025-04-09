@@ -1,6 +1,6 @@
 package com.ibs_demo.invoice_service.config;
 
-import com.ibs_demo.invoice_service.model.Role;
+import com.ibs_demo.invoice_service.exception.appexceptions.InvalidJwtTokenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    public void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws IOException, ServletException {
 
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 } else {
                     log.info("Invalid token");
-                    throw new RuntimeException("Invalid token");
+                    throw new InvalidJwtTokenException();
                 }
             }
 

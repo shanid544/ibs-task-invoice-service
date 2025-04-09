@@ -5,7 +5,7 @@ import com.ibs_demo.invoice_service.config.ServiceUrlConfig;
 import com.ibs_demo.invoice_service.entity.Invoice;
 import com.ibs_demo.invoice_service.event.InvoiceCreatedEvent;
 import com.ibs_demo.invoice_service.request.InvoiceNotificationPayload;
-import com.ibs_demo.invoice_service.utils.InvoiceMapper;
+import com.ibs_demo.invoice_service.mapper.InvoiceMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;

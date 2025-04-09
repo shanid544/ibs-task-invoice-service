@@ -1,4 +1,4 @@
-package com.ibs_demo.invoice_service.utils;
+package com.ibs_demo.invoice_service.mapper;
 
 import com.ibs_demo.invoice_service.entity.BillingLine;
 import com.ibs_demo.invoice_service.entity.Invoice;
@@ -9,11 +9,16 @@ import com.ibs_demo.invoice_service.response.BillingLineResponse;
 import com.ibs_demo.invoice_service.response.InvoiceResponse;
 import com.ibs_demo.invoice_service.response.PaymentInformationResponse;
 import com.ibs_demo.invoice_service.response.UserResponse;
+import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
+@Component
 
 public class InvoiceMapper {
+    private InvoiceMapper() {
+    }
 
     public static InvoiceResponse toInvoiceResponse(Invoice invoice) {
         if (invoice == null) return null;
@@ -51,7 +56,7 @@ public class InvoiceMapper {
     }
 
     private static List<BillingLineResponse> toBillingLineResponses(List<BillingLine> billingLines) {
-        if (billingLines == null) return null;
+        if (billingLines == null) return Collections.emptyList();
 
         return billingLines.stream()
                 .map(line -> new BillingLineResponse(
@@ -61,7 +66,7 @@ public class InvoiceMapper {
                         line.getUnitPrice(),
                         line.getTotalAmount()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static PaymentInformationResponse toPaymentInformationDTO(com.ibs_demo.invoice_service.entity.PaymentInformation pi) {
@@ -91,7 +96,6 @@ public class InvoiceMapper {
         );
     }
 
-    // Convert Billing Lines for Notification Payload
     private static List<BillingLineNotificationPayload> convertBillingLines(List<BillingLine> billingLines) {
         return billingLines.stream()
                 .map(line -> new BillingLineNotificationPayload(
@@ -100,6 +104,6 @@ public class InvoiceMapper {
                         line.getUnitPrice(),
                         line.getTotalAmount()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

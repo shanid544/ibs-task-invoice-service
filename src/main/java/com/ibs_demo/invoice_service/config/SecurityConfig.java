@@ -32,6 +32,7 @@ public class SecurityConfig {
             "/v3/api-docs/**"
     };
 
+    @SuppressWarnings({"java:S4502", "java:S5738"})
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

@@ -9,7 +9,7 @@ import com.ibs_demo.invoice_service.model.Role;
 import com.ibs_demo.invoice_service.request.BillingLineNotificationPayload;
 import com.ibs_demo.invoice_service.request.InvoiceNotificationPayload;
 import com.ibs_demo.invoice_service.response.InvoiceResponse;
-import com.ibs_demo.invoice_service.utils.InvoiceMapper;
+import com.ibs_demo.invoice_service.mapper.InvoiceMapper;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

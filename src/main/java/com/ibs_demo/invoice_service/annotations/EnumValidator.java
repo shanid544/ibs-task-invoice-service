@@ -10,6 +10,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = EnumValidatorImpl.class)
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
+@SuppressWarnings("java:S1452")
 public @interface EnumValidator {
     Class<? extends Enum<?>> enumClass();
     String message() default "Value must be any of enum {enumClass}";

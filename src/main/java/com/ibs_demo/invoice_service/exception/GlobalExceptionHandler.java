@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         log.error(ERROR, ex);
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(error -> ((FieldError) error).getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         ErrorResponse errorResponse = new ErrorResponse(
                 "Validation Error",
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         log.error(ERROR, ex);
         List<String> errors = ex.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         ErrorResponse errorResponse = new ErrorResponse(
                 "Constraint Violation",

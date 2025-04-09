@@ -20,16 +20,14 @@ import com.ibs_demo.invoice_service.response.ItemList;
 import com.ibs_demo.invoice_service.service.InvoiceService;
 import com.ibs_demo.invoice_service.service.ItemServiceRestClient;
 import com.ibs_demo.invoice_service.service.TaxService;
-import com.ibs_demo.invoice_service.utils.InvoiceMapper;
+import com.ibs_demo.invoice_service.mapper.InvoiceMapper;
 import com.ibs_demo.invoice_service.utils.SecurityUtils;
 import com.ibs_demo.invoice_service.utils.TaxServiceProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -49,6 +47,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceServiceConfig invoiceServiceConfig;
     private final TaxServiceProvider taxServiceProvider;
     private final ApplicationEventPublisher applicationEventPublisher;
+
 
     public InvoiceResponse generateInvoice(InvoiceRequest invoiceRequest) {
         String currentSupplierEmail = SecurityUtils.getCurrentUserEmail();

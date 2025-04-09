@@ -1,6 +1,5 @@
 package com.ibs_demo.invoice_service.config;
 
-import com.ibs_demo.invoice_service.entity.User;
 import com.ibs_demo.invoice_service.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,10 +18,10 @@ public class JwtService {
 
 
     @Value("${jwt.secret.key}")
-    private String SECRET_KEY;
+    private String secretKey;
 
     @Value("${jwt.expiration.time}")
-    private String EXPIRATION;
+    private String expiration;
 
 
     private Key key;
@@ -30,7 +29,7 @@ public class JwtService {
 
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
 
@@ -40,7 +39,7 @@ public class JwtService {
                 .setSubject(authentication.getName())
                 .claim("roles", role.toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(EXPIRATION)))
+                .setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(expiration)))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -54,7 +53,7 @@ public class JwtService {
                     .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            return false; // Token is invalid
+            return false;
         }
     }
 
@@ -74,15 +73,15 @@ public class JwtService {
     }
 
     public Claims extractAllClaims(String token) {
-
-        return Jwts.parser()
+        return Jwts
+                .parserBuilder()
                 .setSigningKey(key)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
-
     }
 
     public long getExpirationTime() {
-        return Long.parseLong(EXPIRATION);
+        return Long.parseLong(expiration);
     }
 }
