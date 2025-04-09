@@ -3,12 +3,6 @@ package com.ibs_demo.invoice_service.utils;
 import com.ibs_demo.invoice_service.model.CountryCode;
 import com.ibs_demo.invoice_service.service.TaxService;
 import com.ibs_demo.invoice_service.service.impl.DefaultTaxService;
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,4 +30,3 @@ public class TaxServiceProvider {
         return serviceMap.getOrDefault(countryCode, defaultTaxService);
     }
 }
-

@@ -1,13 +1,11 @@
-package com.ibs_demo.invoice_service.service.falllback;
+package com.ibs_demo.invoice_service.service.handler;
 
 import com.ibs_demo.invoice_service.cachedata.ItemDataStore;
 import com.ibs_demo.invoice_service.response.ItemDetails;
 import com.ibs_demo.invoice_service.response.ItemList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResourceAccessException;
 
 import java.util.List;
 

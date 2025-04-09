@@ -6,10 +6,7 @@ import com.ibs_demo.invoice_service.entity.Invoice;
 import com.ibs_demo.invoice_service.entity.PaymentInformation;
 import com.ibs_demo.invoice_service.entity.User;
 import com.ibs_demo.invoice_service.event.InvoiceCreatedEvent;
-import com.ibs_demo.invoice_service.exception.appexceptions.CountryCodeNotConfiguredException;
-import com.ibs_demo.invoice_service.exception.appexceptions.InvalidCountryCodeException;
-import com.ibs_demo.invoice_service.exception.appexceptions.InvoiceAccessDeniedException;
-import com.ibs_demo.invoice_service.exception.appexceptions.MissingItemQuantityException;
+import com.ibs_demo.invoice_service.exception.appexceptions.*;
 import com.ibs_demo.invoice_service.model.CountryCode;
 import com.ibs_demo.invoice_service.model.InvoiceStatus;
 import com.ibs_demo.invoice_service.model.Role;
@@ -28,6 +25,7 @@ import com.ibs_demo.invoice_service.utils.SecurityUtils;
 import com.ibs_demo.invoice_service.utils.TaxServiceProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
@@ -71,14 +69,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private Invoice buildInvoice(InvoiceRequest invoiceRequest , String supplierEmail) {
         User supplier = userRepository.findByEmail(supplierEmail)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+                .orElseThrow(() -> new SupplierNotFoundException(supplierEmail));
 
         Invoice invoice = new Invoice();
         invoice.setStatus(InvoiceStatus.ACTIVE);
         invoice.setBillingId(invoiceRequest.getBillingId());
         invoice.setSupplier(supplier);
         invoice.setBuyer(userRepository.findById(invoiceRequest.getBuyerId()).orElseThrow(
-                () -> new RuntimeException("Buyer not found")
+                () -> new BuyerNotFoundException(invoiceRequest.getBuyerId())
         ));
         List<Long> itemIds = invoiceRequest.getBillingLines()
                 .stream()
@@ -88,7 +86,15 @@ public class InvoiceServiceImpl implements InvoiceService {
         ItemList itemList = getItemDetails(itemIds);
 
         Map<Long, Integer> itemIdToQuantityMap = invoiceRequest.getBillingLines().stream()
-                .collect(Collectors.toMap(BillingLineRequest::getItemId, (BillingLineRequest::getQuantity)));
+                .collect(Collectors.toMap(
+                        BillingLineRequest::getItemId,
+                        b -> {
+                            if (b.getQuantity() == null) {
+                                throw new MissingItemQuantityException(b.getItemId());
+                            }
+                            return b.getQuantity();
+                        }
+                ));
 
         CountryCode countryCode = getCountryCode(supplier);
         List<BillingLine> billingLines = getBillingLines(itemList, itemIdToQuantityMap, invoice);
@@ -128,10 +134,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         for (ItemDetails item : itemList.getItemDetailsList()) {
             Integer quantity = itemIdToQuantityMap.getOrDefault(item.getId(), null);
 
-            if (quantity == null) {
-                throw new MissingItemQuantityException(item.getId());
-            }
-
             BillingLine billingLine = new BillingLine();
             billingLine.setInvoice(invoice);
             billingLine.setQuantity(quantity);
@@ -166,10 +168,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         return itemServiceClient.getItemDetails(itemIds);
     }
 
-    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
+    @Override
     public InvoiceResponse getInvoiceByBillingId(String email, String billingId) {
         Invoice invoice = invoiceRepository.findByBillingId(billingId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(InvoiceNotFoundException::new);
 
         if (!invoice.getBuyer().getEmail().equals(email) &&
                 !invoice.getSupplier().getEmail().equals(email)) {
@@ -179,10 +181,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         return InvoiceMapper.toInvoiceResponse(invoice);
     }
 
-    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
+    @Override
     public Page<InvoiceResponse> getInvoicesForUser(String email, int page, int size) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("invoiceDate").descending());
 
@@ -200,21 +202,18 @@ public class InvoiceServiceImpl implements InvoiceService {
         return new PageImpl<>(invoiceResponses, pageable, invoices.getTotalElements());
     }
 
-    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
+    @Override
     public Page<InvoiceResponse> getFilteredInvoices(String buyerEmail, String supplierEmail, InvoiceStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("invoiceDate").descending());
         return invoiceRepository.findFilteredInvoices(buyerEmail, supplierEmail, status, pageable)
                 .map(InvoiceMapper::toInvoiceResponse);
     }
 
-
-    @PreAuthorize("hasRole('SUPPLIER')")
+    @Override
     public void softDeleteInvoice(Long invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Invoice not found with ID: " + invoiceId));
         invoice.setStatus(InvoiceStatus.INACTIVE);
         invoiceRepository.save(invoice);
     }
-
-
 }

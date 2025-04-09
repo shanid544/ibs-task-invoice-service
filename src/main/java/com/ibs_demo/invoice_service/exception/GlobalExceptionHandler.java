@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    public static final String ERROR = "Error: ";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        log.error("Error: ", ex);
+        log.error(ERROR, ex);
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(error -> ((FieldError) error).getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.toList());
@@ -36,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
-        log.error("Error: ", ex);
+        log.error(ERROR, ex);
         List<String> errors = ex.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.toList());
@@ -52,7 +54,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        log.error("Error: ", ex);
+        log.error(ERROR, ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 "Not Found",
                 ex.getMessage(),
@@ -64,7 +66,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException ex) {
-        log.error("Error: ", ex);
+        log.error(ERROR, ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 "Duplicate email",
                 ex.getMessage(),
@@ -76,7 +78,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-        log.error("Error: ", ex);
+        log.error(ERROR, ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 "Internal Server Error",
                 ex.getMessage(),
@@ -89,7 +91,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        log.error("Error: ", ex);
+        log.error(ERROR, ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 "Unexpected Error",
                 ex.getMessage(),

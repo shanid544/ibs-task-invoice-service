@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/invoices")
 @RequiredArgsConstructor
@@ -24,18 +26,20 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceService.generateInvoice(invoiceRequest));
     }
 
+    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
     @GetMapping("/{email}/{billingId}")
     public ResponseEntity<InvoiceResponse> getInvoiceByBillingId(@PathVariable String email, @PathVariable String billingId) {
         return ResponseEntity.ok(invoiceService.getInvoiceByBillingId(email, billingId));
     }
 
+    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
     @GetMapping("/user/{email}")
-    public ResponseEntity<Page<InvoiceResponse>> getInvoicesForUser(
+    public ResponseEntity<List<InvoiceResponse>> getInvoicesForUser(
             @PathVariable String email,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
-        return ResponseEntity.ok(invoiceService.getInvoicesForUser(email, page, size));
+        return ResponseEntity.ok(invoiceService.getInvoicesForUser(email, page, size).getContent());
     }
 
     @GetMapping("/filter")

@@ -5,6 +5,7 @@ import com.ibs_demo.invoice_service.config.InvoiceServiceConfig;
 import com.ibs_demo.invoice_service.entity.Invoice;
 import com.ibs_demo.invoice_service.entity.User;
 import com.ibs_demo.invoice_service.event.InvoiceCreatedEvent;
+import com.ibs_demo.invoice_service.exception.appexceptions.*;
 import com.ibs_demo.invoice_service.model.CountryCode;
 import com.ibs_demo.invoice_service.repository.InvoiceRepository;
 import com.ibs_demo.invoice_service.repository.UserRepository;
@@ -130,7 +131,7 @@ class InvoiceServiceImplTest {
     @Test
     void testGenerateInvoice_supplierNotFound() {
         // Given
-        String supplierEmail = "nonexistent_supplier@example.com";
+        String supplierEmail = "supplier@example.com";
         // Assume: SecurityUtils.getCurrentUserEmail() will return this from SecurityContext
 
         InvoiceRequest invoiceRequest = new InvoiceRequest();
@@ -143,11 +144,11 @@ class InvoiceServiceImplTest {
         when(userRepository.findByEmail(supplierEmail)).thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        SupplierNotFoundException exception = assertThrows(SupplierNotFoundException.class, () -> {
             invoiceService.generateInvoice(invoiceRequest);
         });
 
-        assertEquals("Supplier not found", exception.getMessage());
+        assertEquals("Supplier not found with email: "+supplierEmail, exception.getMessage());
     }
 
     @Test
@@ -169,22 +170,141 @@ class InvoiceServiceImplTest {
         when(userRepository.findById(buyerId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BuyerNotFoundException exception = assertThrows(BuyerNotFoundException.class, () -> {
             invoiceService.generateInvoice(invoiceRequest);
         });
 
-        assertEquals("Buyer not found", exception.getMessage());
+        assertEquals("Buyer not found with ID: "+buyerId, exception.getMessage());
+    }
+    @Test
+    void testGenerateInvoice_itemQuantityIsNull() {
+        // Arrange
+        String supplierEmail = "supplier@example.com";
+
+        User supplier = new User();
+        supplier.setEmail(supplierEmail);
+        supplier.setCountryCode(CountryCode.IN);
+
+        User buyer = new User();
+        buyer.setId(2L);
+        buyer.setEmail("buyer@example.com");
+
+        when(userRepository.findByEmail(supplierEmail)).thenReturn(Optional.of(supplier));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(buyer));
+
+        // Create BillingLineRequest with null quantity
+        BillingLineRequest billingLineRequest = new BillingLineRequest();
+        billingLineRequest.setItemId(1L);
+        billingLineRequest.setQuantity(null); // Simulating null quantity
+
+        InvoiceRequest invoiceRequest = new InvoiceRequest();
+        invoiceRequest.setBillingId("INV-002");
+        invoiceRequest.setBuyerId(2L);
+        invoiceRequest.setBillingLines(List.of(billingLineRequest));
+        invoiceRequest.setPaymentInformation(new PaymentInformationRequest());
+
+        // Mock item details
+        ItemDetails itemDetails = new ItemDetails(1L, "Null Quantity Item", "Should fail", 200.0);
+        when(itemServiceClient.getItemDetails(List.of(1L)))
+                .thenReturn(new ItemList(List.of(itemDetails)));
+
+        // Act & Assert
+        MissingItemQuantityException exception = assertThrows(MissingItemQuantityException.class,
+                () -> invoiceService.generateInvoice(invoiceRequest));
+
+        assertTrue(exception.getMessage().contains("1"), "Exception message should contain the missing item ID");
+    }
+
+    @Test
+    void testGenerateInvoice_invalidCountryCode() {
+        // Arrange
+        InvoiceRequest invoiceRequest = createValidInvoiceRequest();
+        invoiceRequest.setBillingId("INV-004");
+
+        // Simulate a supplier with no country code
+        User supplier = new User();
+        supplier.setEmail("supplier@example.com");
+        supplier.setCountryCode(null); // No country code set
+
+        when(userRepository.findByEmail("supplier@example.com")).thenReturn(Optional.of(supplier));
+
+        // Simulate a valid buyer
+        User buyer = new User();
+        buyer.setId(2L);
+        buyer.setEmail("buyer@example.com");
+        when(userRepository.findById(2L)).thenReturn(Optional.of(buyer));
+
+        // Set invalid country code in config
+        when(invoiceServiceConfig.getCountryCode()).thenReturn("INVALID_CODE");
+
+        // Mock ItemService to return valid item details
+        ItemDetails itemDetails = new ItemDetails(1L, "Item A", "Test", 100.0);
+        when(itemServiceClient.getItemDetails(List.of(1L)))
+                .thenReturn(new ItemList(List.of(itemDetails)));
+
+
+
+        // Act & Assert
+        InvalidCountryCodeException exception = assertThrows(InvalidCountryCodeException.class,
+                () -> invoiceService.generateInvoice(invoiceRequest));
+
+        assertTrue(exception.getMessage().contains("Invalid country code configured: "));
+    }
+
+    @Test
+    void testGenerateInvoice_nullCountryCode() {
+        // Arrange
+        InvoiceRequest invoiceRequest = createValidInvoiceRequest();
+        invoiceRequest.setBillingId("INV-004");
+
+        // Simulate a supplier with no country code
+        User supplier = new User();
+        supplier.setEmail("supplier@example.com");
+        supplier.setCountryCode(null); // No country code set
+
+        when(userRepository.findByEmail("supplier@example.com")).thenReturn(Optional.of(supplier));
+
+        // Simulate a valid buyer
+        User buyer = new User();
+        buyer.setId(2L);
+        buyer.setEmail("buyer@example.com");
+        when(userRepository.findById(2L)).thenReturn(Optional.of(buyer));
+
+        // Set invalid country code in config
+        when(invoiceServiceConfig.getCountryCode()).thenReturn(null);
+
+        // Mock ItemService to return valid item details
+        ItemDetails itemDetails = new ItemDetails(1L, "Item A", "Test", 100.0);
+        when(itemServiceClient.getItemDetails(List.of(1L)))
+                .thenReturn(new ItemList(List.of(itemDetails)));
+
+
+
+        // Act & Assert
+        CountryCodeNotConfiguredException exception = assertThrows(CountryCodeNotConfiguredException.class,
+                () -> invoiceService.generateInvoice(invoiceRequest));
+
+        assertTrue(exception.getMessage().contains("invoice-service.country-code"));
+    }
+
+    private InvoiceRequest createValidInvoiceRequest() {
+        BillingLineRequest line = new BillingLineRequest();
+        line.setItemId(1L);
+        line.setQuantity(2);
+
+        InvoiceRequest request = new InvoiceRequest();
+        request.setBillingId("INV-TEST");
+        request.setBuyerId(2L);
+        request.setBillingLines(List.of(line));
+
+        PaymentInformationRequest paymentInfo = new PaymentInformationRequest();
+        paymentInfo.setPaymentMethod("CARD");
+        request.setPaymentInformation(paymentInfo);
+
+        return request;
     }
 
 
-
-
-    // Additional test cases to consider:
-    // -
-    // - testGenerateInvoice_buyerNotFound
-    // - testGenerateInvoice_itemQuantityMismatch
-    // - testGenerateInvoice_invalidCountryCode
-    // - testGenerateInvoice_taxServiceException
 
     @AfterEach
     void clearSecurityContext() {

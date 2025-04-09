@@ -19,6 +19,4 @@ public class PaymentInformation {
     private String formOfPaymentId;      // Payment transaction reference
     private String cardNumberType;       // Masked card number (e.g., 4111XXXXXXXX1234)
     private String shortCardNum;         // Last 4 digits of the card
-
-
 }

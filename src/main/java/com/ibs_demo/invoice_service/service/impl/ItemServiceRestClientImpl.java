@@ -3,7 +3,7 @@ package com.ibs_demo.invoice_service.service.impl;
 import com.ibs_demo.invoice_service.config.ServiceUrlConfig;
 import com.ibs_demo.invoice_service.response.ItemList;
 import com.ibs_demo.invoice_service.service.ItemServiceRestClient;
-import com.ibs_demo.invoice_service.service.falllback.ItemServiceFallbackHandler;
+import com.ibs_demo.invoice_service.service.handler.ItemServiceFallbackHandler;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
