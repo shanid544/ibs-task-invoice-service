@@ -18,8 +18,9 @@ public class InvoiceRequest {
     @NotBlank(message = "Billing ID cannot be blank")
     private String billingId;
 
-    @NotNull(message = "Buyer ID cannot be null")
-    private Long buyerId;
+    @NotNull(message = "Buyer email cannot be null")
+    @NotBlank(message = "Buyer email cannot be blank")
+    private String buyerMail;
 
     @NotNull(message = "Billing lines cannot be null")
     @Size(min = 1, message = "At least one billing line must be provided")

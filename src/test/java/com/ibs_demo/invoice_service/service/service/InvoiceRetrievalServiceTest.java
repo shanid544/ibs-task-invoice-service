@@ -2,9 +2,7 @@ package com.ibs_demo.invoice_service.service.service;
 
 import com.ibs_demo.invoice_service.entity.Invoice;
 import com.ibs_demo.invoice_service.entity.User;
-import com.ibs_demo.invoice_service.exception.appexceptions.InvoiceAccessDeniedException;
-import com.ibs_demo.invoice_service.exception.appexceptions.InvoiceNotFoundException;
-import com.ibs_demo.invoice_service.exception.appexceptions.UserNotFoundException;
+import com.ibs_demo.invoice_service.exception.appexceptions.*;
 import com.ibs_demo.invoice_service.model.InvoiceStatus;
 import com.ibs_demo.invoice_service.model.Role;
 import com.ibs_demo.invoice_service.repository.InvoiceRepository;
@@ -178,13 +176,16 @@ class InvoiceRetrievalServiceTest {
 
     @Test
     void testSoftDeleteInvoice_success() {
-        invoice.setId(1L);
-        when(invoiceRepository.findById(1L)).thenReturn(Optional.of(invoice));
+        Invoice invoiceOne = new Invoice();
+        invoiceOne.setId(1L);
+        invoiceOne.setStatus(InvoiceStatus.ACTIVE);
+
+        when(invoiceRepository.findById(1L)).thenReturn(Optional.of(invoiceOne));
 
         invoiceService.softDeleteInvoice(1L);
 
-        assertEquals(InvoiceStatus.INACTIVE, invoice.getStatus());
-        verify(invoiceRepository).save(invoice);
+        assertEquals(InvoiceStatus.INACTIVE, invoiceOne.getStatus());
+        verify(invoiceRepository).save(invoiceOne);
     }
 
     @Test
@@ -195,7 +196,34 @@ class InvoiceRetrievalServiceTest {
                 () -> invoiceService.softDeleteInvoice(999L));
 
         assertEquals("Invoice not found with ID: 999", ex.getMessage());
+    }
 
+    @Test
+    void testSoftDeleteInvoice_alreadyInactive() {
+        Invoice invoiceOne = new Invoice();
+        invoiceOne.setId(1L);
+        invoiceOne.setStatus(InvoiceStatus.INACTIVE);
+
+        when(invoiceRepository.findById(1L)).thenReturn(Optional.of(invoiceOne));
+
+        InactiveInvoiceException ex = assertThrows(InactiveInvoiceException.class,
+                () -> invoiceService.softDeleteInvoice(1L));
+
+        assertEquals("Invoice with billing ID '1' is inactive.", ex.getMessage());
+    }
+
+    @Test
+    void testSoftDeleteInvoice_alreadyPaid() {
+        Invoice invoiceOne = new Invoice();
+        invoiceOne.setId(1L);
+        invoiceOne.setStatus(InvoiceStatus.PAID);
+
+        when(invoiceRepository.findById(1L)).thenReturn(Optional.of(invoiceOne));
+
+        AlreadyPaidInvoiceException ex = assertThrows(AlreadyPaidInvoiceException.class,
+                () -> invoiceService.softDeleteInvoice(1L));
+
+        assertEquals("Invoice with billing ID '1' is already paid.", ex.getMessage());
     }
 
 

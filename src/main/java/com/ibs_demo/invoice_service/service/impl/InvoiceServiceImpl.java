@@ -74,8 +74,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setStatus(InvoiceStatus.ACTIVE);
         invoice.setBillingId(invoiceRequest.getBillingId());
         invoice.setSupplier(supplier);
-        invoice.setBuyer(userRepository.findById(invoiceRequest.getBuyerId()).orElseThrow(
-                () -> new BuyerNotFoundException(invoiceRequest.getBuyerId())
+        invoice.setBuyer(userRepository.findByEmail(invoiceRequest.getBuyerMail()).orElseThrow(
+                () -> new BuyerNotFoundException(invoiceRequest.getBuyerMail())
         ));
         List<Long> itemIds = invoiceRequest.getBillingLines()
                 .stream()
@@ -212,6 +212,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void softDeleteInvoice(Long invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Invoice not found with ID: " + invoiceId));
+        if(invoice.getStatus() == InvoiceStatus.INACTIVE) {
+            throw new InactiveInvoiceException(invoiceId);
+        }
+        if(invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new AlreadyPaidInvoiceException(invoiceId);
+        }
         invoice.setStatus(InvoiceStatus.INACTIVE);
         invoiceRepository.save(invoice);
     }

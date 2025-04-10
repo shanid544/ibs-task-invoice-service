@@ -2,7 +2,9 @@ package com.ibs_demo.invoice_service.service.exception;
 
 import com.ibs_demo.invoice_service.exception.ErrorResponse;
 import com.ibs_demo.invoice_service.exception.GlobalExceptionHandler;
+import com.ibs_demo.invoice_service.exception.appexceptions.AlreadyPaidInvoiceException;
 import com.ibs_demo.invoice_service.exception.appexceptions.DuplicateEmailException;
+import com.ibs_demo.invoice_service.exception.appexceptions.InactiveInvoiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 class GlobalExceptionHandlerTest {
 
@@ -60,6 +64,26 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Unexpected Error", response.getBody().getError());
         assertEquals("Unexpected error", response.getBody().getMessage());
+    }
+
+    @Test
+    void testHandleInactiveInvoiceException() {
+        InactiveInvoiceException exception = new InactiveInvoiceException(1L);
+        ResponseEntity<ErrorResponse> response = handler.handleInactiveInvoiceException(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+
+    }
+
+    @Test
+    void testHandleAlreadyPaidInvoiceException() {
+        AlreadyPaidInvoiceException exception = new AlreadyPaidInvoiceException(1L);
+        ResponseEntity<ErrorResponse> response = handler.handleAlreadyPaidInvoiceException(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+
     }
 
 }

@@ -1,3 +1,0 @@
-2025-04-02 14:41:16.356280+05:30 jdbc[13]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM BILLING_LINES INVOICES [*]INVOICES"; SQL statement:
-SELECT * FROM BILLING_LINES INVOICES INVOICES [42000-232]

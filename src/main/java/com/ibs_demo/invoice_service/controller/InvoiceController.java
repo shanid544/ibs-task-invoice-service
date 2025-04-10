@@ -14,26 +14,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/invoices")
+@RequestMapping("/api/v1/invoices")
 @RequiredArgsConstructor
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
 
-    @PreAuthorize("hasRole('SUPPLIER')")
     @PostMapping("/generate")
+    @PreAuthorize("hasRole('SUPPLIER')")
     public ResponseEntity<InvoiceResponse> generateInvoice(@RequestBody @Valid InvoiceRequest invoiceRequest) {
         return ResponseEntity.ok(invoiceService.generateInvoice(invoiceRequest));
     }
 
-    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
+
     @GetMapping("/{email}/{billingId}")
+    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
     public ResponseEntity<InvoiceResponse> getInvoiceByBillingId(@PathVariable String email, @PathVariable String billingId) {
         return ResponseEntity.ok(invoiceService.getInvoiceByBillingId(email, billingId));
     }
 
-    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
+
     @GetMapping("/user/{email}")
+    @PreAuthorize("hasAnyRole('BUYER', 'SUPPLIER')")
     public ResponseEntity<List<InvoiceResponse>> getInvoicesForUser(
             @PathVariable String email,
             @RequestParam(defaultValue = "0") int page,
@@ -56,6 +58,7 @@ public class InvoiceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPPLIER')")
     public ResponseEntity<Void> softDeleteInvoice(@PathVariable Long id) {
         invoiceService.softDeleteInvoice(id);
         return ResponseEntity.noContent().build();
