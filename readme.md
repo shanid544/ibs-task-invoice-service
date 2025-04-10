@@ -90,9 +90,9 @@ This system includes the following microservices:
 ### 📦 Clone Repositories
 
 ```bash
-git clone https://github.com/your-username/invoice-service.git
-git clone https://github.com/your-username/item-service.git
-git clone https://github.com/your-username/notification-service.git
+git clone https://github.com/shanid544/ibs-task-notification-service
+git clone https://github.com/shanid544/ibs-task-item-service
+git clone https://github.com/shanid544/ibs-task-invoice-service
 
 ## ✅ Prerequisites
 
@@ -108,8 +108,8 @@ git clone https://github.com/your-username/notification-service.git
 
 | Service      | Port | Run Command           |
 |--------------|------|------------------------|
-| Invoice      | 8080 | `mvn spring-boot:run`  |
-| Item         | 8081 | `mvn spring-boot:run`  |
-| Notification | 8082 | `mvn spring-boot:run`  |
+| Invoice      | 9090 | `mvn spring-boot:run`  |
+| Item         | 9091 | `mvn spring-boot:run`  |
+| Notification | 9093 | `mvn spring-boot:run`  |
 
 > ✅ **H2 data files (`*.mv.db`) are already committed**, so no need to reinitialize the database manually.
